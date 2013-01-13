@@ -32,7 +32,7 @@
 
 /*  module Declarations {{{1*/
 
-static function_entry amf_functions[] = {
+static zend_function_entry amf_functions[] = {
     PHP_FE(amf_encode, NULL)
     PHP_FE(amf_decode, NULL)
     PHP_FE(amf_join_test, NULL)
@@ -1185,7 +1185,7 @@ static void amf3_serialize_object(amf_serialize_output buf,zval**struc, amf_seri
 		int resultType = AMFC_TYPEDOBJECT;
 		int resultValueLength = 0;
 		zval** resultValue = struc;
-		int deallocResult = Z_REFCOUNT_PP(struc);
+		int deallocResult = ZVAL_REFCOUNT(*struc);
 
 		resultType = amf_perform_serialize_callback(struc, &className,&classNameLen,&resultValue,var_hash TSRMLS_CC);
 		
@@ -2632,7 +2632,7 @@ static int amf0_read_string(zval **rval, const unsigned char **p, const unsigned
 			return SUCCESS;
 		}
 	}
-	ZVAL_STRINGL(*rval, (char*)src, slength, 1)
+	ZVAL_STRINGL(*rval, (char*)src, slength, 1);
 	return SUCCESS;
 }
 
@@ -2670,7 +2670,7 @@ static int amf3_read_string(zval **rval, const unsigned char **p, const unsigned
 		}
 		else
 		{
-			Z_DELREF_P(newval);
+			ZVAL_DELREF(newval); 
 		}
 		*rval = newval;
 	}
