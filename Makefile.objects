@@ -1,0 +1,8 @@
+$(phplibdir)/amf.la: ./amf.la
+	$(LIBTOOL) --mode=install cp ./amf.la $(phplibdir)
+
+./amf.la: $(shared_objects_amf) $(AMF_SHARED_DEPENDENCIES)
+	$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_amf) $(AMF_SHARED_LIBADD)
+
+amf.lo: /var/devtools/amfext/amf.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/var/devtools/amfext $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /var/devtools/amfext/amf.c -o amf.lo 

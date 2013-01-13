@@ -1,0 +1,66 @@
+
+amfext (native) 0.8.*
+=====================
+
+This extension implements the ActionScript Message Format 
+for encoding and decoding,both in AMF and AMF3 versions.
+Information can be found in [0].
+
+This extension provides two low level functions useful for
+encoding and decoding objects into AMF format, but it does
+not provide functions for managing the full message. An
+example of implementation can be found in [1].
+
+Details on the encoding process can be read in doc/encoding.txt
+
+Documentation on the PHP function and the callbacks is in doc/amfextdoc.php
+
+Constants for the flags that can be used in the encoding/decoding are in amfext.php
+that can be included.
+
+The directory tests contains some tests that can be invoked directly. Eventually drop AMFPHP
+sources somewhere for testing the PHP version against the C version. See test_common.php for
+details.
+
+Building
+-------------
+
+Under Windows: download the source of your PHP version and unpack the zip under the
+ext directory of the source. Open the associated Visual Studio project (amf4.dsp or amf5.dsp)
+and just build. Everything should be fine. For distributing the extension is suggested to use 
+Visual Studio 6, otherwise 2003 is fine.
+
+Under Uni*/Linux: obtain your php-devel package and unpack the zip in a directory. Then
+as any PHP extension perform:
+
+    phpize
+    ./configure --enable-amf
+    make install
+    
+Note: there could be some little problems if php includes are not under /usr
+
+In any case remember to add the amf.so/php_amf.dll extension to the php.ini file
+
+Known Builds
+--------------
+
+This code has been tested under Windows (PHP 4.4.0, 5.2.0) and Fedora (PHP 4.1.6) under a 32 bit machine.
+
+Please check the behaviour with 64-bit machine
+
+Thanks
+---------------
+
+Thanks to Patrick Mineault from AMF for the support, and from the authors
+of the JSON PHP extension for the skeleton of the project.
+
+
+Authors
+-------
+
+Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+
+---
+
+[0] http://osflash.org/doku.php?id=amf
+[1] http://amfphp.sourceforge.net/

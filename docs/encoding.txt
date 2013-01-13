@@ -1,0 +1,261 @@
+
+Project: AMF extension for PHP for encoding and decoding ActionScript messages
+Author: Emanuele Ruffaldi emanuele.ruffaldi@gmail.com
+License: PHP License 3.0 
+Revision: 1.3
+Last Revision: 13th Feb 2007
+
+This document describes the encoding and decoding details used by AMF for PHP. Please check for ISSUE and TODO for open aspects
+
+TODO: charsets in recordsets
+
+=Encoding and Decoding details=
+
+==Encoding==
+This is the mapping from PHP types to AMF types.
+
+Every string is represented in UTF8. When it is not the case conversion is needed. In the implementation we provide
+this using AMF_TRANSLATE_CHARSET and AMF_TRANSLATE_CHARSET_NOASCII. That generate a AMFE_TRANSLATE_CHARSET event
+both in encoding and decoding.
+
+===AMF0===
+This is the encoding by PHP type.
+
+IS_BOOL: AMF0_BOOLEAN
+IS_NULL: AMF0_NULL
+IS_LONG: AMF0_NUMBER converted into double
+IS_DOUBLE: AMF0_NUMBER 
+IS_STRING: AMF0_STRING or AMF0_LONGSTRING
+IS_OBJECT: AMF0_REFERENCE if cached. Otherwise handled as following:
+    # if classname is "stdclass" then AMF0_OBJECT as anonymous object
+    # if no callback is specified then AMF0_TYPEDOBJECT with the classname
+    # else invoke the callback. The callback should return (value, type, classname). When type is not specified it is interpreted as AMFC_TYPEDOBJECT. When classname is not specified it is the same classname of the original.
+        AMFC_XML: encode value as an XML string AMF0_XML.
+        AMFC_OBJECT: encode value as a AMF0_OBJECT. Value can be an object or an array
+        AMFC_TYPEDOBJECT: encode value as a AMF0_TYPEDOBJECT with specified classname. Value can be an object or an array
+        AMFC_ANY: encode value as a mixed type
+        AMFC_ARRAY: encode value as array. Value can be an object or an array
+        AMFC_NONE: AMF0_UNDEFINED
+        AMFC_RAW: use the string as direct encoding 
+        AMFC_BYTEARRAY: encoded just as a string
+        
+        TODO AMFC_RECORDSET
+        
+    Note: private and protected members of an object are not serialized. They are marked with a key starting with \0
+    
+IS_RESOURCE: as IS_OBJECT using empty classname. If it is not handled by the callback generates AMF0_UNDEFINED and an error
+IS_ARRAY: AMF0_REFERENCE if cached. Otherwise handled as following:
+    The keys are analized in one pass for understanding the type of data. For this purpose
+    negative indices are considered string keys.
+    
+    # only string keys => AMF0_OBJECT 
+    # string keys and numeric keys => AMF0_MIXEDARRAY
+    # only numeric keys contiguous => AMF0_ARRAY
+    # only numeric keys and not contiguous => AMF0_MIXEDARRAY 
+
+    Special Case - support for recordsets. A recordset can be optimized with a compact class representation
+    A recordset is triggered by an array with a key __amf_recordset__=1
+    
+    Recordset array("__amf_recordset__" => 1, rows => ... , cols => array("c1","c2",...), id => "")
+    
+    The key "rows" is an array of rows each with the same number of elements as the "cols" array.
+    
+    In AMF0 it is represented with a typed object of class RecordSet
+    
+    typedobject class=RecordSet
+        "serverInfo" => object(
+            "totalCount" => total rows count
+            "initialData" => array of rows. Each row is an array of column values
+            "cursor" => 1
+            "serviceName" => "PageAbleResult"
+            "columnNames" => array(c1,...,cN)
+            "version" => 1
+            "id" => the same as the id field of the above array, if present otherwise ""
+        )
+===AMF3===
+This is the encoding by PHP type.
+
+IS_BOOL: AMF3_TRUE or AMF3_FALSE
+IS_NULL: AMF3_NULL
+IS_LONG: AMF3_INT if it can be represented in 29 bits: $d >= -268435456 && $d <= 268435455 otherwise it is a double
+IS_DOUBLE: AMF3_NUMBER
+IS_STRING: AMF3_STRING with caching
+IS_OBJECT: cached reference or following handling:
+    
+    # if classname is "stdclass" then generate AMF3_OBJECT with the same classname
+    # if no callback is specified then AMF0_TYPEDOBJECT with the classname
+    # else invoke the callback. The callback should return (value, type, classname). When type is not specified it is interpreted as AMFC_TYPEDOBJECT. When classname is not specified it is the same classname of the original.
+    
+        AMFC_XML: encode value as an XML string AMF3_XML. ISSUE should be this string cached?
+        AMFC_OBJECT: encode value as AMF3_OBJECT with anonymous class. Value can be an object or an array
+        AMFC_TYPEDOBJECT: encode value as a AMF3_OBJECT with specified classname. Value can be an object or an array
+        AMFC_ANY: encode value as a mixed type
+        AMFC_ARRAY: encode value as array. Value can be an object or an array
+        AMFC_NONE: AMF3_UNDEFINED
+        AMFC_RAW: use the string as direct encoding 
+        AMFC_BYTEARRAY: AMF3_BYTEARRAY
+        
+        TODO special AMFC_RECORDSET
+           
+    Note: private and protected members of an object are not serialized. They are marked with a key starting with \0
+    
+IS_RESOURCE: as IS_OBJECT using empty classname. If it is not handled by the callback generates AMF0_UNDEFINED and an error
+
+IS_ARRAY: cached reference or following handling:
+    The keys are analized in one pass for understanding the type of data. For this purpose
+    negative indices are considered string keys. 
+    
+    # only string keys or not contiguos numeric keys => AMF3_OBJECT anonymous
+    # others => AMF3_ARRAY
+    
+    ISSUE maybe an array with not contiguos numeric keys could be an AMF3_ARRAY with no numeric values and only keys
+
+    Special Case - support for recordsets. A recordset can be optimized with a compact class representation extremely efficient in AMF3. A recordset is triggered by an array with a key __amf_recordset__=1
+    
+    Recordset array("__amf_recordset__" => 1, rows => ... , cols => array("c1","c2",...) )
+    
+    The key "rows" is an array of rows each with the same number of elements as the "cols" array.
+    
+    This special array is encoded with an anonymous class that has a fixed number of fields as the columns of the recordset. Then
+    the data is represented by an array of objects of this anonymous types containing all the data. Such representation is 
+    extremely packed and efficient, without the names of the fields The pseudo representation of such recordset is as following.
+    
+        AMF3_ARRAY with length rowcount 
+            AMF0_OBJECT with inline class definition (name="", static object, members = "c1","c2",...) and data "a00","a01","a02",...
+            AMF0_OBJECT of last class definition and packed data "a10","a11",...
+            AMF0_OBJECT of last class definition and packed data "a20","a21",...
+            AMF0_OBJECT of last class definition and packed data "a30","a31",...
+            
+    TODO if ArrayCollection mode then prepend with object "flex.messaging.io.ArrayCollection" as externalizable class
+
+    
+    
+ISSUE predefined class members in class definitions are not used, except for the case of Recordset. Eventually it could be optimized by using
+PHP class definition
+
+
+==Decoding==
+
+When a string is going to be received there is a charset encoding process from the Flash UTF8 format to the PHP encoding.
+Such encoding option can be activated using the flag AMF_TRANSLATE_CHARSET
+
+===AMF0===
+
+AMF0_UNDEFINED: NULL
+AMF0_NULL: NULL
+AMF0_BOOL: true or false
+AMF0_NUMBER: double
+AMF0_STRING: string
+AMF0_LONGSTRING: string
+AMF0_XML: string  Invoke AMFE_POST_DECODE_XML callback for transforming XML data into object
+AMF0_AMF3: AMF3 mode
+AMF0_MOVIECLIP, AMF0_UNSUPPORTED,AMF0_RECORDSET: unsupported
+AMF0_MIXEDARRAY: array with string and integer keys. A string key that can be a negative integer is treated as an integer key.
+AMF0_ARRAY: array with only positive numeric keys
+AMF0_OBJECT,AMF0_TYPEDOBJECT: 
+
+    # invoke the callback for mapping the classname to an object or array. Only if the classname is not empty. If the callback returns NULL then continue otherwise use this value
+    # otherwise if the AMF_ASSOCIATIVE_DECODE is set the object is decoded as array, with the additional key _explicitType with the classname
+    # otherwise if the AMF_ASSOCIATIVE_DECODE is NOT set the decoder tries to instantiate the object with the classname or "stdcase" if the class is not existant or it is an anonymous class
+    
+    If the callback has been provided and the flags AMF_POST_DECODE is present invoke the post decode callback for transformation of the object or replacement
+
+===AMF3===
+
+AMF3_UNDEFINED: NULL
+AMF3_NULL: NULL
+AMF3_FALSE: false
+AMF3_TRUE: true
+AMF3_INTEGER: integer
+AMF3_NUMBER: double
+AMF3_STRING: string
+AMF3_BYTEARRAY: string Invoke AMFE_POST_BYTEARRAY callback for possibly transforming the data
+AMF3_XMLSTRING and AMF3_XML: string  Invoke AMFE_POST_DECODE_XML callback for transforming XML data into object
+AMF3_DATE: double TODO invoke postdecode callback?
+AMF3_ARRAY: array with strink and numeric keys. Converts strings of negative keys into numbers
+AMF3_OBJECT: 
+
+    If the class is not marked as externalizable
+    
+    # invoke the callback for mapping the classname to an object or array using AMFE_MAP, only if the classname is not empty
+    # otherwise if the AMF_ASSOCIATIVE_DECODE is set the object is decoded as array, with the additional key _explicitType with the classname
+    # otherwise if the AMF_ASSOCIATIVE_DECODE is not set the decoder tries to instantiate the object with the classname or "stdcase" if the class is not existant or it is an anonymous class
+    
+    If the class is marked as externalizable - the callback is invoked with AMFE_MAP_EXTERNALIZABLE. If the callback returns NULL or it is not present then the decoder tries
+    to read another value from the decoding stream. If the callback returns not NULL then the value is used for the decoding.
+    
+    TODO externalizable should receive the input data stream process it some way
+    
+    If the callback has been provided and the flags AMF_POST_DECODE is present invoke the post decode callback for
+    transformation of the object or replacement
+
+
+=Callbacks=
+
+These are some comments on the typical callbacks in PHP
+
+==Typical Encoding Callback ==
+
+    if(PHP5 && $classname == "domdocument") return ($value->saveXml(), AMFC_XML);
+    if(!PHP5 && $classname == "domdocument") return ($value->dump_mem(), AMFC_XML);
+    if(!PHP5 && $classname == "simplexmlelement") return ($value->asXML(), AMFC_XML);
+
+==Typical Decoding Callback==
+
+This is the typical decoding callback for PHP.
+
+AMFE_MAP:
+    An adapter mapping from Database data should build an array array("__amf_recordset__"=> 1, "rows" => array(r1,...,rN)        
+    
+AMFE_MAP_EXTERNALIZABLE:
+    $classname = $arg;
+    if($classname == "flex.messaging.io.ArrayCollection") return NULL; // that is AMFC_ANY
+    elsif($classname == "flex.messaging.io.ObjectProxy") return NULL; // that is AMFC_ANY
+    else ERROR!
+    
+AMFE_POST_DECODE:
+    if($isObject && method_exists($value, 'init'))
+        $obj->init();
+    
+AMFE_POST_XML:
+    parse XML
+
+    
+=Optimization=
+
+These are some of the optimization performed by the encoder and decoder.
+
+Caching: during encoding objects are cached using the effective address as a key. If the long type has the same length of a pointer it is possible to use the pointer as the key instead of a string representation of the address
+
+Output: the encoder generates a string. Such string can be short or extremely long. Moreover it could contains the content of other
+PHP strings that are possibily long (like for text representation of XML data). In the initial version the PHP smartstr structure was
+used but it was extremely inefficient. We have optimized the output generation using a linked list of buffers that are allocated
+on demanding. The size of the buffer starts with 64 and grows exponentially to a maximum of 128k. The content of each buffer is made
+of a sequence of raw strings or references to zval containing strings. A PHP string is stored as a reference only if its length is bigger
+than a certain threshold (128) because the fragmentation of the buffer reduces the performances.
+
+For example
+
+    part - "..." ref "......" ref end
+    part - ref "..." ref ref ref "... ... " end 
+    
+ ISSUE a possibile optimization to be adopted is to avoid the caching of long strings
+ 
+=Recordset=
+
+Apart the special handling of __amf_recordset__ it could be interesting to generate the data directly from the database with
+reduced memory usage
+       
+AMFC_RECORDSET specifies a recordset. The value is an array that describes the recordset. The recordset can be fully specified or by parts. 
+    
+In fully specified we need to provide all the data at once
+
+value = array( "rows" => array(r1, ..., rN), "cols" => array(c1, ... cN) )  
+
+TODO In callback mode the data is provided by callback in multiple iterations. Initially it just returns the structure and on following
+invocations it should return some rows
+
+Initial: value = array( "rows" => rowcount, "cols" => array(c1, ... cN), ... )
+Following: value = array( "rows" => array(r1,...,rN)) 
+Last: when the rowcount is reached or the callback returns NULL the iteration is terminated.
+

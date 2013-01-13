@@ -1,0 +1,21 @@
+
+
+Windows
+====================
+
+For PHP4 use windows\php4\php_amf.dll and copy into ext folder of PHP
+For PHP5 use windows\php5\php_amf.dll and copy into ext folder of PHP
+
+Then update the php.ini with the line
+
+extension=php_amf.dll
+
+
+Linux/Others
+====================
+
+Build from sources and copy the amf.so library into the
+ext folder of PHP (typically /usr/lib/php/modules). 
+The update php.ini under /etc
+
+extension=amf.so

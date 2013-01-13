@@ -1,0 +1,10 @@
+// $Id: config.w32,v 1.3 2007/05/22 00:48:37 auroraeosrose Exp $
+// vim:ft=javascript
+
+ARG_WITH("amf", "AMF Object Serialization support", "no");
+
+ if (PHP_AMF != "no") {
+	EXTENSION('amf', 'amf.c');
+	AC_DEFINE('HAVE_AMF', 1);
+ }
+

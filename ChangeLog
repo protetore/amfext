@@ -1,0 +1,107 @@
+2008-07-17  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+version 0.9.1
+- fixed pecl bug 12668 on anonymous serialization
+
+2007-02-21  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+version 0.9
+- added "version" in "serverInfo" for AM0 while sending recordset
+- charset handling
+
+2007-02-20  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+- cleaned comments, AMF_DEALLOC macro and if
+
+2007-02-18  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+- added "version" in "serverInfo" for AM0 while sending recordset
+
+2007-02-16  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+version 0.9
+- changed back the callback
+- fixed reference issue in callback, caused by callback function with &
+
+2007-02-14  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+- finished implementation of the charset handling
+- small test with testCharset
+- fixed all tests with the new serialization callback
+- added AMF_TRANSLATE_CHARSET_NOASCII in decoding to skip UTF8 that are US-ASCII (that is lower than 0x7F): 
+	UTF-8, ISO-8859-1 have the first part in common to US-ASCII
+	
+	AMF_TRANSLATE_CHARSET_NOASCII cannot be used in encoding Big5
+		Big5 is double byte: first byte is ASCII or in 0x81-0xFE, second in 0x40 to 0x7e, 0xa1 to 0xfe
+		Shift_JIS is double byte: first byte is is ASCII (with exception) or over, second can be low or high	
+  
+
+2007-02-13  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+- initial implementation of the charset handling. 
+- TODO: check the use of shared
+- TODO: check the new scheme for encoding callback
+- TODO: check the use of raw
+
+2007-02-08  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+version 0.8.9
+- added AMF_TRANSLATE_CHARSET flag, AMFE_TRANSLATE_CHARSET event and added event to the callback
+for supporting different charsets. Changes have been applied to: amf3_write_string,amf3_write_string_zval
+amf0_serialize_string,amf0_serialize_zstring,amf0_write_string. In AMF3 the transliteration is performed
+AFTER the cache check. TODOOOOO!
+
+2007-02-01  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+version 0.8.8
+- StringBuilder as resource
+- AMF_AS_STRING_BUILDER in amf_encode for returing a StringBuilder resource
+- fixed bug in the amf4.dsp creating bad PHP4 modules
+
+2007-01-27  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+- removed warning in linux build
+
+2007-01-20  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+version 0.8.7
+- fixed encoding of private member variables 
+
+2007-01-13  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+
+- fixed head of AMF3_OBJECT that was written as byte
+- fixed case of rows shorter than columns in recordset
+
+2007-01-12  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+version  0.8.5 and change name to AMF
+- fixed IS_ARRAY
+
+2007-01-11  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+version: 0.8.3
+- added AMFC_BYTEARRAY in encoding callback for encoding ByteArray
+- added AMFE_BYTEARRAY for decoding ByteArray as a callback
+- no more AMFE_MAP for objects with empty classname
+
+2007-01-08  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+- added phpinfo
+- added nextStringIndex for future optimized zval lookup
+- 
+- fixed caching of zval with handling of is_ref
+
+2007-01-07  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+- fixed return of classname from encoding callback
+- added __amfphp_recordset__ for AMF0 exposing it as RecordSet object
+- fixed array count in decoding array
+
+2007-01-06  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+
+- arrays inited to 
+- stdclass class is mapped to anonymous object in AMF3
+- added AMFE_POST_XML
+- added AMFE_MAP_EXTERNABLIZABLE
+- negative integer keys 
+
+2007-01-05  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+
+- added support for resources
+- fixed type check in encoding callbacks
+- added documentation
+- cleaned numeric string array test
+    
+2007-01-02  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+- optimized encoding by replacing smart_str with chunked string builder
+- fixed arrays in AMF3
+- corrected reference counts
+
+2006-12-27  Emanuele Ruffaldi <emanuele.ruffaldi@gmail.com>
+
+- Initial version
