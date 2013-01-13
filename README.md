@@ -8,6 +8,7 @@ The main purpose is to mantain compatibility with new versions of PHP.
 We currently have two branches:
 
 Master - Compatible with PHP 5.4.9 (need more test)
+
 PHP53x - Compatible with PHP 5.3.x (being used for over a year in production environment)
 
 
