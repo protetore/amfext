@@ -1185,7 +1185,7 @@ static void amf3_serialize_object(amf_serialize_output buf,zval**struc, amf_seri
 		int resultType = AMFC_TYPEDOBJECT;
 		int resultValueLength = 0;
 		zval** resultValue = struc;
-		int deallocResult = ZVAL_REFCOUNT(*struc);
+		int deallocResult = Z_REFCOUNT_P(*struc);
 
 		resultType = amf_perform_serialize_callback(struc, &className,&classNameLen,&resultValue,var_hash TSRMLS_CC);
 		
