@@ -1,9 +1,32 @@
+amfext (native) 0.9
+===============
+
 About the Project
 ===============
 
 This project is focused on adjustments on the original AMFEXT project from Emanuele Ruffaldi posted on PECL. You can check it in this address: http://pecl.php.net/package/amfext.
 
 The main purpose is to mantain compatibility with new versions of PHP.
+
+This extension implements the ActionScript Message Format 
+for encoding and decoding,both in AMF and AMF3 versions.
+Information can be found in [0].
+
+This extension provides two low level functions useful for
+encoding and decoding objects into AMF format, but it does
+not provide functions for managing the full message. An
+example of implementation can be found in [1].
+
+Details on the encoding process can be read in doc/encoding.txt
+
+Documentation on the PHP function and the callbacks is in doc/amfextdoc.php
+
+Constants for the flags that can be used in the encoding/decoding are in amfext.php
+that can be included.
+
+
+Known Builds
+===============
 
 We currently have the following branches:
 
