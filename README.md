@@ -1,7 +1,4 @@
-amfext (native) 0.9
-===============
-
-About the Project
+AMFExt (native) 0.9
 ===============
 
 This project is focused on adjustments on the original AMFEXT project from Emanuele Ruffaldi posted on PECL. You can check it in this address: http://pecl.php.net/package/amfext.
