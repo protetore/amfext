@@ -16,6 +16,20 @@ PHP54x - Compatible with PHP 5.4.x (being used for over a year in production env
 PHP55x - In development
 
 
+How to Install
+===============
+
+Download the file from github and then:
+
+* cd AMFEXT-FOLDER
+* phpize
+* chmod +x configure && chmod +x build/shtool (in some cases)
+* ./configure
+* make clean
+* make
+* sudo make intall
+
+
 Below are some information for Git beginners.
 
 
