@@ -5,11 +5,15 @@ This project is focused on adjustments on the original AMFEXT project from Emanu
 
 The main purpose is to mantain compatibility with new versions of PHP.
 
-We currently have two branches:
+We currently have the following branches:
 
-Master - Compatible with PHP 5.4.9 (need more test)
+Master
 
-PHP53x - Compatible with PHP 5.3.x (being used for over a year in production environment)
+PHP53x - Compatible with PHP 5.3.x 
+
+PHP54x - Compatible with PHP 5.4.x (being used for over a year in production environment)
+
+PHP55x - In development
 
 
 Below are some information for Git beginners.
