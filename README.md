@@ -27,13 +27,19 @@ Known Builds
 
 We currently have the following branches:
 
-Master - Tested with PHP 5.4.x and PHP 5.6.2
+Master - Tested with PHP 5.4.x, 5.5.14 and PHP 5.6.2 in LINUX (CentOS, Arch Linux, Ubuntu and Debian)
+         Tested with PHP 5.4.x MAC OSX (Snow, Lion and Mountain)
 
-PHP53x - Compatible with PHP 5.3.x 
+PHP53x - Tested with PHP 5.3.x in Linux (CentOS, Arch Linux, Ubuntu and Debian)
+         Tested with PHP 5.3.x MAC OSX (Snow, Lion and Mountain)
+         Used for over a year in production environment - CentOS
 
-PHP54x - Compatible with PHP 5.4.x (being used for over a year in production environment)
-
+PHP54x - Tested with PHP 5.4.x in Linux (CentOS, Arch Linux, Ubuntu and Debian) 
+         Tested with PHP 5.4.x MAC OSX (Snow, Lion and Mountain)
+         Being used for over a year in production environment - CentOS
+         
 PHP55x - In development
+
 
 
 How to Install
