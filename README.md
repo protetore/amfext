@@ -7,7 +7,7 @@ The main purpose is to mantain compatibility with new versions of PHP.
 
 We currently have the following branches:
 
-Master
+Master - Tested with PHP 5.4.x and PHP 5.6.2
 
 PHP53x - Compatible with PHP 5.3.x 
 
